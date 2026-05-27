@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { apiFetch } from '../../services/api.js'
+import {
+  createCategoria,
+  deleteCategoria,
+  getCategorias,
+  updateCategoria,
+} from '../../services/api.js'
 
 const initialForm = {
   nombre: '',
@@ -19,7 +24,7 @@ function Categorias() {
     try {
       setIsLoading(true)
       setError('')
-      const data = await apiFetch('/api/categorias')
+      const data = await getCategorias()
       setCategorias(data)
     } catch (apiError) {
       setError(apiError.message)
@@ -29,7 +34,31 @@ function Categorias() {
   }
 
   useEffect(() => {
-    loadCategorias()
+    let ignore = false
+
+    async function fetchCategorias() {
+      try {
+        const data = await getCategorias()
+
+        if (!ignore) {
+          setCategorias(data)
+        }
+      } catch (apiError) {
+        if (!ignore) {
+          setError(apiError.message)
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchCategorias()
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
   function openCreateModal() {
@@ -77,15 +106,9 @@ function Categorias() {
       setError('')
 
       if (editingCategory) {
-        await apiFetch(`/api/categorias/${editingCategory.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(payload),
-        })
+        await updateCategoria(editingCategory.id, payload)
       } else {
-        await apiFetch('/api/categorias', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        })
+        await createCategoria(payload)
       }
 
       await loadCategorias()
@@ -108,9 +131,7 @@ function Categorias() {
 
     try {
       setError('')
-      await apiFetch(`/api/categorias/${categoria.id}`, {
-        method: 'DELETE',
-      })
+      await deleteCategoria(categoria.id)
       await loadCategorias()
     } catch (apiError) {
       setError(apiError.message)

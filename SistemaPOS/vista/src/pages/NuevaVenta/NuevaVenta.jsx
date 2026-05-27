@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { apiFetch } from '../../services/api.js'
+import {
+  createVenta,
+  getClientes,
+  getProductos,
+} from '../../services/api.js'
 
 function NuevaVenta() {
   const [clientes, setClientes] = useState([])
@@ -28,8 +32,8 @@ function NuevaVenta() {
     async function loadData() {
       try {
         const [clientesData, productosData] = await Promise.all([
-          apiFetch('/api/clientes'),
-          apiFetch('/api/productos'),
+          getClientes(),
+          getProductos(),
         ])
 
         if (!ignore) {
@@ -148,10 +152,7 @@ function NuevaVenta() {
       setError('')
       setSuccess('')
 
-      await apiFetch('/api/ventas', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      })
+      await createVenta(payload)
 
       setClienteId('')
       setProductoId('')
