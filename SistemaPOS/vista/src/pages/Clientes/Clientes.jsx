@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { apiFetch } from '../../services/api.js'
+import {
+  createCliente,
+  deleteCliente,
+  getClientes,
+  updateCliente,
+} from '../../services/api.js'
 
 const initialForm = {
   nombre: '',
@@ -20,7 +25,7 @@ function Clientes() {
     try {
       setIsLoading(true)
       setError('')
-      const data = await apiFetch('/api/clientes')
+      const data = await getClientes()
       setClientes(data)
     } catch (apiError) {
       setError(apiError.message)
@@ -34,7 +39,7 @@ function Clientes() {
 
     async function fetchClientes() {
       try {
-        const data = await apiFetch('/api/clientes')
+        const data = await getClientes()
 
         if (!ignore) {
           setClientes(data)
@@ -104,15 +109,9 @@ function Clientes() {
       setError('')
 
       if (editingClient) {
-        await apiFetch(`/api/clientes/${editingClient.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(payload),
-        })
+        await updateCliente(editingClient.id, payload)
       } else {
-        await apiFetch('/api/clientes', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        })
+        await createCliente(payload)
       }
 
       await loadClientes()
@@ -135,9 +134,7 @@ function Clientes() {
 
     try {
       setError('')
-      await apiFetch(`/api/clientes/${cliente.id}`, {
-        method: 'DELETE',
-      })
+      await deleteCliente(cliente.id)
       await loadClientes()
     } catch (apiError) {
       setError(apiError.message)

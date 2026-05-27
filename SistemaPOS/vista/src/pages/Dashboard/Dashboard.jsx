@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
-import { apiFetch } from '../../services/api.js'
+import {
+  getClientes,
+  getProductos,
+  getVentas,
+} from '../../services/api.js'
 
 function getList(data) {
   if (Array.isArray(data)) {
@@ -71,9 +75,9 @@ function Dashboard() {
         setError('')
 
         const [productosData, clientesData, ventasData] = await Promise.all([
-          apiFetch('/api/productos'),
-          apiFetch('/api/clientes'),
-          apiFetch('/api/ventas'),
+          getProductos(),
+          getClientes(),
+          getVentas(),
         ])
 
         if (!isMounted) {

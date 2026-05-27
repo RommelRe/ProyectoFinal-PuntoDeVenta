@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import Dashboard from './pages/Dashboard/index.jsx'
 import Productos from './pages/Productos/index.jsx'
@@ -13,7 +13,8 @@ function App() {
 
       <main className="page-container">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/productos" element={<Productos />} />
           <Route path="/categorias" element={<Categorias />} />
           <Route path="/clientes" element={<Clientes />} />

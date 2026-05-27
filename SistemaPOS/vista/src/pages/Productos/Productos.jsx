@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
-import { apiFetch } from '../../services/api.js'
+import {
+  createProducto,
+  deleteProducto,
+  getCategorias,
+  getProductos,
+  updateProducto,
+} from '../../services/api.js'
 
 const initialForm = {
   nombre: '',
@@ -19,29 +25,40 @@ function Productos() {
   const [error, setError] = useState('')
 
   async function loadProductos() {
-    const data = await apiFetch('/api/productos')
+    const data = await getProductos()
     setProductos(data)
   }
 
-  async function loadCategorias() {
-    const data = await apiFetch('/api/categorias')
-    setCategorias(data)
-  }
-
-  async function loadData() {
-    try {
-      setIsLoading(true)
-      setError('')
-      await Promise.all([loadProductos(), loadCategorias()])
-    } catch (apiError) {
-      setError(apiError.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   useEffect(() => {
-    loadData()
+    let ignore = false
+
+    async function fetchData() {
+      try {
+        const [productosData, categoriasData] = await Promise.all([
+          getProductos(),
+          getCategorias(),
+        ])
+
+        if (!ignore) {
+          setProductos(productosData)
+          setCategorias(categoriasData)
+        }
+      } catch (apiError) {
+        if (!ignore) {
+          setError(apiError.message)
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchData()
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
   function openCreateModal() {
@@ -93,15 +110,9 @@ function Productos() {
       setError('')
 
       if (editingProduct) {
-        await apiFetch(`/api/productos/${editingProduct.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(payload),
-        })
+        await updateProducto(editingProduct.id, payload)
       } else {
-        await apiFetch('/api/productos', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        })
+        await createProducto(payload)
       }
 
       await loadProductos()
@@ -124,9 +135,7 @@ function Productos() {
 
     try {
       setError('')
-      await apiFetch(`/api/productos/${producto.id}`, {
-        method: 'DELETE',
-      })
+      await deleteProducto(producto.id)
       await loadProductos()
     } catch (apiError) {
       setError(apiError.message)
