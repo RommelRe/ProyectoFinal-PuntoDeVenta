@@ -4,7 +4,7 @@ Sistema POS es una aplicación web para administrar productos, categorías, clie
 
 ## Tecnologías Usadas
 
-- .NET 8
+- .NET 10
 - ASP.NET Core Web API
 - React
 - Vite
